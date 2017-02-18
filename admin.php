@@ -4,9 +4,32 @@
   <title>Cloud Meet</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google-signin-client_id" content="567367740537-epe61ssfrv2efb00h4igu64icd05ebuv.apps.googleusercontent.com">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <script>
+    function onSignIn(googleUser) {
+      var profile = googleUser.getBasicProfile();
+      console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+      console.log('Name: ' + profile.getName());
+      console.log('Image URL: ' + profile.getImageUrl());
+      console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.      
+      
+      $( "#lblbienvenida" ).html("Bienvenido <br />"+  profile.getName() );
+      $( "#lblbienvenida" ).append("</br> "+profile.getEmail() );
+      //$( "#fperfil" ).html("<img name='aboutme' class='img-circle' src='"+  profile.getImageUrl()+"'/>" );
+    } 
+
+     function signOut() {
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function () {
+          console.log('User signed out.');
+          document.location.href=".";
+        });
+      }
+</script>
   <style>
     /* Remove the navbar's default margin-bottom and rounded borders */ 
     .navbar {
@@ -49,7 +72,8 @@
     <div class="collapse navbar-collapse" id="myNavbar">
       
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="."><span class="glyphicon glyphicon-log-out"></span> Cerrar Sesión</a></li>
+        <li><div class="g-signin2" data-onsuccess="onSignIn"></div></li>      
+        <li><a href="#" onclick="signOut();"><span class="glyphicon glyphicon-log-out"></span></a></li>
       </ul>
     </div>
   </div>
