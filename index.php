@@ -9,6 +9,18 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="https://apis.google.com/js/platform.js" async defer></script>
+
+<script>
+    function onSignIn(googleUser) {
+      var profile = googleUser.getBasicProfile();
+      console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+      console.log('Name: ' + profile.getName());
+      console.log('Image URL: ' + profile.getImageUrl());
+      console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.      
+      document.location.href="inicio.php";
+    } 
+</script>
+
   <style>
     /* Remove the navbar's default margin-bottom and rounded borders */ 
     .navbar {
@@ -41,7 +53,7 @@
         <li><a href="#">Contacto</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="inicio.php" ><span class="glyphicon glyphicon-log-in"></span> Iniciar sesión</a></li>
+        <li><a href="inicio.php"  class="g-signin2" data-onsuccess="onSignIn" ><span class="glyphicon glyphicon-log-in"></span> Iniciar sesión</a></li>
       </ul>
     </div>
   </div>
