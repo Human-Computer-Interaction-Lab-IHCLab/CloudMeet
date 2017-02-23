@@ -29,7 +29,7 @@ Un posible caso de aplicación es un escenario donde la dirección, cuerpos acad
 
 ### Desarrolladores
 ##### Arturo Garcia Nevares 
-##### Roberto Daniel Ochoa Grajales   
+##### Roberto Daniel Ochoa Grajales [robd8a@gmail.com](mailto:robd8a@gmail.com)   
 ##### Isaac Jaramillo Cajica
 ##### Jonathan Ramirez Cobarrubias
 ##### Guillermo Arcos Barreda  
