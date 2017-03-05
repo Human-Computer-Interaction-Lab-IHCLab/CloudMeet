@@ -31,6 +31,6 @@ Un posible caso de aplicación es un escenario donde la dirección, cuerpos acad
 ##### Arturo Garcia Nevares 
 ##### Roberto Daniel Ochoa Grajales [robd8a@gmail.com](mailto:robd8a@gmail.com)   
 ##### Isaac Jaramillo Cajica [isaak@ucol.mx](mailto:isaak@ucol.mx)
-##### Jonathan Ramirez Cobarrubias
+##### Jonathan Salvador Ramírez Covarrubias [jrcovarrubias@ucol.mx](mailto:jrcovarrubias@ucol.mx)
 ##### Guillermo Arcos Barreda  
 ##### Victor Hugo Medina Sandoval [vmedina@ucol.mx](mailto:vmedina@ucol.mx)
