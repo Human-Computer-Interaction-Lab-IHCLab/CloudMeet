@@ -144,9 +144,9 @@ More about developing:
 
 
 ### Desarrolladores
-##### Arturo Garcia Nevares 
+##### Arturo Garcia Nevares [narturo@ucol.mx](mailto:narturo@ucol.mx) 
 ##### Roberto Daniel Ochoa Grajales [robd8a@gmail.com](mailto:robd8a@gmail.com)   
 ##### Isaac Jaramillo Cajica [isaak@ucol.mx](mailto:isaak@ucol.mx)
 ##### Jonathan Salvador Ramírez Covarrubias [jrcovarrubias@ucol.mx](mailto:jrcovarrubias@ucol.mx)
-##### Guillermo Arcos Barreda  
+##### Guillermo Arcos Barreda [guillermo_arcos@ucol.mx](mailto:guillermo_arcos@ucol.mx) 
 ##### Victor Hugo Medina Sandoval [vmedina@ucol.mx](mailto:vmedina@ucol.mx)
