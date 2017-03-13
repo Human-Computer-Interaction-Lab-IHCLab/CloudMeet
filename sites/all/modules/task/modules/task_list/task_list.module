@@ -1,0 +1,374 @@
+<?php
+
+/**
+ * Implements hook_entity_info().
+ */
+function task_list_entity_info() {
+  $includes = drupal_get_path('module', 'task_list') . '/includes';
+
+  $return['task_list'] = array(
+    'label' => t('Task list'),
+    'entity class' => 'TaskList',
+    'controller class' => 'TaskListController',
+    'base table' => 'task_list',
+    'fieldable' => TRUE,
+    'entity keys' => array(
+      'id' => 'lid',
+      'bundle' => 'type',
+    ),
+    'bundle keys' => array(
+      'bundle' => 'type',
+    ),
+    'bundles' => array(),
+    'load hook' => 'task_list_load',
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Default'),
+        'custom settings' => FALSE,
+      ),
+    ),
+    'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
+    'module' => 'task',
+    'access callback' => 'task_list_access',
+   );
+
+  $return['task_list_type'] = array(
+    'label' => t('Task List Type'),
+    'entity class' => 'TaskListType',
+    'controller class' => 'TaskListTypeController',
+    'base table' => 'task_list_type',
+    'fieldable' => FALSE,
+    'bundle of' => 'task_list',
+    'exportable' => TRUE,
+    'entity keys' => array(
+      'id' => 'id',
+      'name' => 'type',
+      'label' => 'label',
+    ),
+    'module' => 'task',
+    // Enable the entity API's admin UI.
+    'admin ui' => array(
+      'path' => 'admin/structure/task-list-types',
+      'file' => 'task_list.admin.inc',
+      'controller class' => 'TaskListTypeUIController',
+      'file path' => $includes,
+    ),
+    'access callback' => 'task_list_type_access',
+  );
+  return $return;
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function task_list_entity_info_alter(&$entity_info) {
+
+  foreach (task_list_types() as $type => $info) {
+    $entity_info['task_list']['bundles'][$type] = array(
+      'label' => $info->label,
+      'admin' => array(
+        'path' => 'admin/structure/task-list-types/manage/%task_list_type',
+        'real path' => 'admin/structure/task-list-types/manage/' . $type,
+        'bundle argument' => 4,
+      ),
+    );
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function task_list_menu() {
+  $includes = drupal_get_path('module', 'task_list') . '/includes';
+  $items = array();
+
+  $items['task-list/add'] = array(
+    'title' => 'Add task list',
+    'page callback' => 'task_list_admin_add_page',
+    'access arguments' => array('administer task list entities'),
+    'file' => 'task_list.admin.inc',
+    'file path' => $includes,
+  );
+
+  $task_list_uri = 'task-list/%task_list';
+  $task_list_uri_argument_position = 1;
+
+  $items[$task_list_uri] = array(
+    'title callback' => 'entity_label',
+    'title arguments' => array('task_list', $task_list_uri_argument_position),
+    'page callback' => 'task_list_view',
+    'page arguments' => array($task_list_uri_argument_position),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'task_list', $task_list_uri_argument_position),
+    'file' => 'task_list.pages.inc',
+    'file path' => $includes,
+  );
+
+  $items[$task_list_uri . '/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
+  $items[$task_list_uri . '/delete'] = array(
+    'title' => 'Delete task list',
+    'title callback' => 'task_list_label',
+    'title arguments' => array($task_list_uri_argument_position),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('task_list_delete_form', $task_list_uri_argument_position),
+    'access callback' => 'entity_access',
+    'access arguments' => array('edit', 'task_list', $task_list_uri_argument_position),
+    'file' => 'task_list.admin.inc',
+    'file path' => $includes,
+  );
+
+  $items[$task_list_uri . '/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('task_list_form', $task_list_uri_argument_position),
+    'access callback' => 'entity_access',
+    'access arguments' => array('edit', 'task_list', $task_list_uri_argument_position),
+    'file' => 'task_list.admin.inc',
+    'file path' => $includes,
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+
+  foreach (task_list_types() as $type => $info) {
+    $items['task-list/add/' . $type] = array(
+      'title' => $info->label,
+      'page callback' => 'task_list_add',
+      'page arguments' => array(2),
+      'access callback' => 'entity_access',
+      'access arguments' => array('create', 'task_list', $type),
+      'file' => 'task_list.admin.inc',
+      'file path' => $includes,
+    );
+  }
+
+  $items['admin/structure/task-list-types/%task_list_type/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('task_list_type_form_delete_confirm', 4),
+    'access arguments' => array('administer task list types'),
+    'weight' => 1,
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'task_list.admin.inc',
+    'file path' => $includes,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ */
+function task_list_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  if ($root_path == 'admin/content/task-lists') {
+    $item = menu_get_item('task-list/add');
+    if ($item['access']) {
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function task_list_permission() {
+  $permissions = array(
+    'edit own task entities' => array(
+      'title' => t('Edit own tasks'),
+      'description' => t('Allows users to edit own tasks.'),
+      'restrict access' => TRUE,
+    ),
+    'administer task list types' => array(
+      'title' => t('Administer task list types'),
+      'description' => t('Allows users to configure task list types and their fields.'),
+      'restrict access' => TRUE,
+    ),
+    'administer task list entities' => array(
+      'title' => t('Administer task list'),
+      'description' => t('Allows users to administer all task lists.'),
+      'restrict access' => TRUE,
+    ),
+    'create task list entities' => array(
+      'title' => t('Create task lists'),
+      'description' => t('Allows users to create task lists.'),
+      'restrict access' => TRUE,
+    ),
+    'view task list entities' => array(
+      'title' => t('View task lists'),
+      'description' => t('Allows users to view task lists.'),
+      'restrict access' => TRUE,
+    ),
+    'edit any task list entities' => array(
+      'title' => t('Edit any task lists'),
+      'description' => t('Allows users to edit any task lists.'),
+      'restrict access' => TRUE,
+    ),
+    'edit own task list entities' => array(
+      'title' => t('Edit own task lists'),
+      'description' => t('Allows users to edit own task lists.'),
+      'restrict access' => TRUE,
+    ),
+  );
+
+  return $permissions;
+}
+
+/**
+ * Implements hook_field_extra_fields().
+ */
+function task_list_field_extra_fields() {
+  $extra = array();
+
+  foreach (task_list_types() as $type) {
+    $extra['task_list'][$type->type] = array(
+      'form' => array(
+        'title' => array(
+          'label' => t('Title'),
+          'description' => t('Task list module element'),
+          'weight' => -5,
+        ),
+        'description' => array(
+          'label' => t('Description'),
+          'description' => t('Task list module element'),
+          'weight' => 0,
+        ),
+      ),
+    );
+  }
+
+  return $extra;
+}
+
+/**
+ * Implements hook_entity_property_info_alter().
+ */
+function task_list_entity_property_info_alter(&$info) {
+  $properties = &$info['task_list']['properties'];
+  $properties['created'] = array(
+    'label' => t("Date created"),
+    'type' => 'date',
+    'description' => t("The date the node was posted."),
+    'setter callback' => 'entity_property_verbatim_set',
+    'setter permission' => 'administer nodes',
+    'schema field' => 'created',
+  );
+  $properties['changed'] = array(
+    'label' => t("Date changed"),
+    'type' => 'date',
+    'schema field' => 'changed',
+    'description' => t("The date the node was most recently updated."),
+  );
+  $properties['uid'] = array(
+    'label' => t("Author"),
+    'type' => 'user',
+    'description' => t("The author of the task."),
+    'setter callback' => 'entity_property_verbatim_set',
+    'setter permission' => 'administer task entities',
+    'required' => TRUE,
+    'schema field' => 'uid',
+  );
+}
+
+/**
+ * Access callback for task list.
+ */
+function task_list_access($op, $task, $account = NULL, $entity_type = NULL) {
+  global $user;
+
+  if (!isset($account)) {
+    $account = $user;
+  }
+  switch ($op) {
+    case 'create':
+      return user_access('administer task list entities', $account)
+          || user_access('create task list entities', $account);
+    case 'view':
+      return user_access('administer task list entities', $account)
+          || user_access('view task list entities', $account);
+    case 'edit':
+      return user_access('administer task list entities')
+          || user_access('edit any task list entities')
+          || (user_access('edit own task list entities') && ($task->uid == $account->uid));
+  }
+}
+
+/**
+ * Load a task_list.
+ */
+function task_list_load($tid, $reset = FALSE) {
+  $task_lists = task_list_load_multiple(array($tid), array(), $reset);
+  return reset($task_lists);
+}
+
+/**
+ * Load multiple task_lists based on certain conditions.
+ */
+function task_list_load_multiple($tids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('task_list', $tids, $conditions, $reset);
+}
+
+/**
+ * Save task_list.
+ */
+function task_list_save($task_list) {
+  entity_save('task_list', $task_list);
+}
+
+/**
+ * Delete single task_list.
+ */
+function task_list_delete($task_list) {
+  entity_delete('task_list', entity_id('task_list' ,$task_list));
+}
+
+/**
+ * Delete multiple task_lists.
+ */
+function task_list_delete_multiple($task_list_ids) {
+  entity_delete_multiple('task_list', $task_list_ids);
+}
+
+/**
+ * Access callback for task_list Type.
+ */
+function task_list_type_access($op, $entity = NULL) {
+  return user_access('administer task_list types');
+}
+
+/**
+ * Load task_list Type.
+ */
+function task_list_type_load($task_list_type) {
+  return task_list_types($task_list_type);
+}
+
+/**
+ * List of task_list Types.
+ */
+function task_list_types($type_name = NULL) {
+  $types = entity_load_multiple_by_name('task_list_type', isset($type_name) ? array($type_name) : FALSE);
+  return isset($type_name) ? reset($types) : $types;
+}
+
+/**
+ * Save task_list type entity.
+ */
+function task_list_type_save($task_list_type) {
+  entity_save('task_list_type', $task_list_type);
+}
+
+/**
+ * Delete single task_list type.
+ */
+function task_list_type_delete($task_list_type) {
+  entity_delete('task_list_type', entity_id('task_list_type' ,$task_list_type));
+}
+

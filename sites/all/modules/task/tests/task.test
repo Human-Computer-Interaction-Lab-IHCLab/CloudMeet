@@ -1,0 +1,150 @@
+<?php
+
+/**
+ * @file
+ * Unit tests for the task module.
+ */
+
+/**
+ * Test the task and task type CRUD.
+ */
+class TaskTest extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Task',
+      'description' => 'Ensure that task works.',
+      'group' => 'Task',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp('task');
+  }
+
+  /**
+   * Ensure the default task type is created.
+   */
+  public function testTaskDefaultTasks() {
+    $default_types = array(
+      'task' => 'Task',
+    );
+
+    // Load the default product types.
+    $types_created = task_types();
+
+    // Ensure each type exists.
+    foreach ($default_types as $type => $name) {
+      $this->assertTrue(!empty($types_created[$type]), 'Task type ' . check_plain($type) . ' has been created.');
+    }
+  }
+
+  /**
+   * Test the task type CRUD functions.
+   */
+  public function testTaskTypeCrud() {
+    // Ensure task_type_new() returns a valid empty task type.
+    $new_task_type = task_type_new();
+    $this->assertNull($new_task_type->type, 'task_type_new() instantiated the type property.');
+    $this->assertNotNull($new_task_type->label, 'task_type_new() instantiated the label property.');
+    $this->assertNotNull($new_task_type->description, 'task_type_new() instantiated the description property.');
+    $this->assertTrue($new_task_type->is_new, 'task_type_new() instantiated the is_new property.');
+
+    $type = $this->randomName(20);
+    $label = $this->randomName(40);
+    $description = $this->randomString(128);
+
+    $new_task_type->type = $type;
+    $new_task_type->label = $label;
+    $new_task_type->description = $description;
+
+    task_type_save($new_task_type);
+
+    $saved_task_type = task_type_load($type);
+    $this->assertTrue($saved_task_type, 'task_type_load() loaded the new task type.');
+    $this->assertEqual($type, $saved_task_type->type, 'The new task type type was properly saved and loaded.');
+    $this->assertEqual($label, $saved_task_type->label, 'The new task type label was properly saved and loaded.');
+    $this->assertEqual($description, $saved_task_type->description, 'The new task type description text was properly saved and loaded.');
+
+    $altered_label = $this->randomName(40);
+    $saved_task_type->label = $altered_label;
+    task_type_save($saved_task_type);
+
+    $updated_task_type = task_type_load($type);
+
+    $this->assertEqual($altered_label, $updated_task_type->label, 'Updated task type label using task_type_save().');
+
+    task_type_delete($updated_task_type);
+
+    $deleted_type = task_type_load($type);
+    $this->assertFalse($deleted_type, 'task_type_delete() successfully removed a task type.');
+  }
+
+  /**
+   * Test the task CRUD functions.
+   */
+  public function testTaskCrud() {
+    // Ensure task_new() returns a new task.
+    $new_task = task_new('task');
+    $fields = array('type', 'title', 'description', 'uid', 'completed');
+    foreach ($fields as $field) {
+      $this->assertNotNull($new_task->{$field}, 'task_new() instantiated the ' . check_plain($field) . ' property.');
+    }
+
+    $new_task->type = $type = 'task';
+    $new_task->title = $title = $this->randomName(10);
+    $new_task->uid = 1;
+    $new_task->completed = FALSE;
+
+    task_save($new_task);
+
+    $loaded_task = task_load($new_task->tid);
+
+    foreach ($fields as $field) {
+      $this->assertEqual($loaded_task->{$field}, $new_task->{$field}, 'The ' . check_plain($field) . ' value loaded by task_load() matches the value saved by task_save()');
+    }
+
+    $this->assertTrue($loaded_task->created > 0, 'task_save() added a created date to the task');
+    $this->assertTrue($loaded_task->changed > 0, 'task_save() added a changed date to the task');
+
+    $this->assertNotNull($loaded_task->task_assignee, 'Ensure assignee field is present.');
+
+    $loaded_task->uid = 0;
+    task_save($loaded_task);
+
+    $updated_task = task_load($loaded_task->tid);
+    $this->assertEqual($updated_task->uid, 0, 'task_save() successfully updated the task.');
+
+    // Ensure task_load_multiple() can load multiple multiple tasks.
+    $saved_task_ids = array();
+
+    // First create and save multiple new tasks.
+    for ($i = 0; $i < 3; $i++) {
+      $task = task_new('task');
+      $task->type = 'task';
+      $task->title = $this->randomName(10);
+      $task->uid = 1;
+      task_save($task);
+
+      // Save the ID and title of the newly created task.
+      $saved_task_ids[$task->tid] = $task->title;
+    }
+
+    $loaded_tasks = task_load_multiple(array_keys($saved_task_ids));
+    $this->assertEqual(count($saved_task_ids), count($loaded_tasks), 'task_load_multiple() loaded the proper number of the tasks.');
+    foreach ($loaded_tasks as $loaded_task) {
+      $this->assertEqual($loaded_task->title, $saved_task_ids[$loaded_task->tid], 'task_load_multiple() successfully loaded a task.');
+    }
+
+    // Ensure task_delete() can remove a task.
+    task_delete($new_task);
+    $deleted_task_load = task_load_multiple(array($new_task->tid), array(), TRUE);
+    $this->assertFalse($deleted_task_load, 'task_load_multiple() could not load the deleted task.');
+
+    // Ensure task_delete_multiple() can delete multiple tasks.
+    task_delete_multiple(array_keys($saved_task_ids));
+    $deleted_tasks_load = task_load_multiple(array_keys($saved_task_ids), array(), TRUE);
+    $this->assertFalse($deleted_tasks_load, 'task_load_multiple() could not load the deleted tasks.');
+
+  }
+}

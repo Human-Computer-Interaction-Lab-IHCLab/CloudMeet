@@ -1,0 +1,126 @@
+<?php
+
+/**
+ * @file
+ * Functional tests for the commerce product ui module.
+ */
+
+/**
+ * Test the task and task type CRUD.
+ */
+class TaskUITest extends DrupalWebTestCase {
+  protected $privileged_user;
+
+  public static function getInfo() {
+    return array(
+      'name' => 'Task UI',
+      'description' => 'Ensure that the task UI works.',
+      'group' => 'Task',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp('task');  // Enable any modules required for the test
+
+    $permissions = array('create task entities', 'view own task entities', 'edit own task entities', 'edit assigned task entities');
+
+    $this->privileged_user_one = $this->drupalCreateUser($permissions);
+    $this->privileged_user_two = $this->drupalCreateUser($permissions);
+  }
+
+  /**
+   * Tests creating a task using the UI.
+   */
+  public function testTaskBasicCreate() {
+
+    $this->drupalLogin($this->privileged_user_one);
+
+    $title_key = "title";
+    $description = "description";
+    $edit = array();
+    $edit[$title_key] = $this->randomName(8);
+    $edit[$description] = $this->randomName(16);
+    $this->drupalPost('task/add/task', $edit, t('Save task'));
+
+    $this->assertText(t('Task @title saved.', array('@title' => $edit[$title_key])));
+  }
+
+  /**
+   * Tests editing a task using the UI.
+   */
+  public function testTaskBasicEdit() {
+    $this->drupalLogin($this->privileged_user_one);
+
+    $user_one = $this->privileged_user_one;
+
+    $new_task = $this->createDummyTask($user_one->uid);
+
+    $edit = array();
+    $edit['title'] = $this->randomName(8);
+    $this->drupalPost('task/' . $new_task->tid . '/edit', $edit, t('Save task'));
+
+    $this->assertText(t('Task @title saved.', array('@title' => $edit['title'])));
+
+  }
+
+  /**
+   * Tests deleting a task using the UI.
+   */
+  public function testTaskBasicDelete() {
+    $this->drupalLogin($this->privileged_user_one);
+
+    $user_one = $this->privileged_user_one;
+    $new_task = $this->createDummyTask($user_one->uid);
+
+    $this->drupalPost('task/' . $new_task->tid . '/delete', NULL, t('Delete'));
+
+    $this->assertText(t('Task @title deleted.', array('@title' => $new_task->title)));
+
+  }
+
+  /**
+   * Tests redirect when user clicks on Delete button within task edit form
+   * with destination parameter in URL.
+   */
+  public function testTaskDeleteButtonRedirect() {
+    $this->drupalLogin($this->privileged_user_one);
+
+    $user_one = $this->privileged_user_one;
+    $new_task = $this->createDummyTask($user_one->uid);
+
+    $options = array('query' => array('destination' => 'user'));
+
+    $this->drupalPost('task/' . $new_task->tid . '/edit', NULL, t('Delete'), $options);
+
+    $this->assertText(t('Are you sure you want to delete task @title?', array('@title' => $new_task->title)));
+  }
+
+  /**
+   * Helper method used to create a dummy task.
+   *
+   * @param $uid
+   *   A user id.
+   * @param $type
+   *   Task type.
+   * @param $title
+   *   Task title, or if title is not added then randomName() will be used.
+   * @param $completed
+   *   Task completed value.
+   *
+   * @return
+   *   Returns a task object.
+   */
+  public function createDummyTask($uid = 1, $type = 'task', $title = NULL, $completed = FALSE) {
+
+    $task = task_new($type);
+    $task->title = !empty($title) ? $title : $this->randomName(10);
+    $task->uid = $uid;
+    $task->completed = $completed;
+
+    task_save($task);
+
+    return $task;
+  }
+
+
+}

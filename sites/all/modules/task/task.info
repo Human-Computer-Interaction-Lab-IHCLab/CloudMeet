@@ -1,0 +1,23 @@
+name = Task
+description = Create task items.
+package = Task
+core = 7.x
+dependencies[] = entity
+dependencies[] = entityreference
+dependencies[] = views
+
+files[] = includes/task.controller.inc
+files[] = includes/views/handlers/task_handler_create_task_form_area.inc
+files[] = includes/views/handlers/task_handler_field_task_link.inc
+files[] = includes/views/handlers/task_handler_field_task_link_edit.inc
+files[] = includes/views/handlers/task_handler_field_task_link_delete.inc
+files[] = includes/views/handlers/task_handler_field_task_completed.inc
+files[] = tests/task.test
+files[] = tests/task_ui.test
+
+; Information added by Drupal.org packaging script on 2015-04-03
+version = "7.x-1.0-alpha2"
+core = "7.x"
+project = "task"
+datestamp = "1428046384"
+
