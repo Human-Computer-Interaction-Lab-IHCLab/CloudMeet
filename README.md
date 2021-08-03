@@ -1,15 +1,28 @@
-# CloudMeet 1.0 2017
+# CloudMeet
 ## Gestión de grupos de trabajo
-## Descripción General del Sistema
+### Descripción General del Sistema
+
+El sistema permite a los usuarios la administración de grupos de trabajo, con el fin de colaborar en línea el desarrollo de actividades de interés para dependencias de educación superior. Los grupos de trabajo estarán integrados por personal académico, quienes tendrán a su disposición un conjunto de herramientas para manejar integrantes, eventos, documentos, minutas y notificaciones sobre las actividades que se pretenden llevar a cabo.
 
 Un posible caso de aplicación es un escenario donde la dirección, cuerpos académicos y academias de una facultad requieren un espacio colaborativo para realizar las funciones correspondientes.
 
+### Desarrolladores
+
+Proyecto desarrollado en el IHCLab en la materia de ***Interacción Humano-Computadora*** de la **Maestría en Tecnologías de Información** de la [Facultad de Telemática](http://telematicanet.ucol.mx/) en la [Universidad de Colima](https://www.ucol.mx/). Generación 2015-2017.
+
+- Arturo Garcia Nevares
+- Roberto Daniel Ochoa Grajales
+- Isaac Jaramillo Cajica
+- Jonathan Salvador Ramírez Covarrubias
+- Guillermo Arcos Barreda
+- Victor Hugo Medina Sandoval
+
 #### Ejemplo de situación para el sistema:
-1. Un grupo va a actualizar de programas de estudio
-2. Da de alta de participantes del grupo
-3. Agendar reuniones
-4. Mandar comunicados
-5. Sube documentos compartidos
+1. Un grupo va a actualizar de programas de estudio.
+2. Da de alta de participantes del grupo.
+3. Agendar reuniones.
+4. Mandar comunicados.
+5. Sube documentos compartidos.
 
 
 ### Requerimientos funcionales
@@ -21,10 +34,6 @@ Un posible caso de aplicación es un escenario donde la dirección, cuerpos acad
 | Administrar tareas y responsables de actividades | El sistema tendrá la funcionalidad de crear tareas, y poder asignarlas a un miembro del grupo de trabajo. Estas tareas quedarán calendarizadas. | 
 | Compartir archivos al grupo de trabajo en la nube |  Se permitirá compartir archivos por medio del almacenamiento de Google (drive), que estarán disponibles para los miembros del grupo de trabajo. | 
 |Subir minutas y acuerdos pactados en el evento.|  El sistema permitirá subir documentos como una minuta de una reunión o acuerdos, en el evento que corresponde. | 
-
-  
-
- 
 
 Proyecto generado con DRUPAL
 ------------
@@ -139,14 +148,3 @@ More about developing:
    http://drupal.org/best-practices
  * Refer to the API documentation:
    http://api.drupal.org/api/drupal/7
-
-
-
-
-### Desarrolladores
-##### Arturo Garcia Nevares [narturo@ucol.mx](mailto:narturo@ucol.mx) 
-##### Roberto Daniel Ochoa Grajales [robd8a@gmail.com](mailto:robd8a@gmail.com)   
-##### Isaac Jaramillo Cajica [isaak@ucol.mx](mailto:isaak@ucol.mx)
-##### Jonathan Salvador Ramírez Covarrubias [jrcovarrubias@ucol.mx](mailto:jrcovarrubias@ucol.mx)
-##### Guillermo Arcos Barreda [guillermo_arcos@ucol.mx](mailto:guillermo_arcos@ucol.mx) 
-##### Victor Hugo Medina Sandoval [vmedina@ucol.mx](mailto:vmedina@ucol.mx)
